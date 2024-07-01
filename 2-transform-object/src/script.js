@@ -1,5 +1,20 @@
+import gsap from "gsap";
+import GUI from "lil-gui";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+
+const gui = new GUI({
+  width: 300,
+  closeFolders: true,
+});
+const debugHolder = {};
+gui.hide();
+
+window.addEventListener("keydown", (e) => {
+  if (e.key === "h") {
+    gui.show(gui._hidden);
+  }
+});
 
 const canvas = document.querySelector("canvas.webgl");
 
@@ -7,25 +22,49 @@ const canvas = document.querySelector("canvas.webgl");
 const scene = new THREE.Scene();
 
 // OBJECT
-// const geometry = new THREE.BoxGeometry(1, 1, 1, 2, 2, 2);
+const geometry = new THREE.BoxGeometry(1, 1, 1, 2, 2, 2);
 
-const geometry = new THREE.BufferGeometry();
-const count = 50;
-
-const positionArr = new Float32Array(count * 3 * 3);
-for (let i = 0; i < positionArr.length; i++) {
-  positionArr[i] = Math.random() - 0.5;
-}
-
-const positionAtributes = new THREE.BufferAttribute(positionArr, 3);
-geometry.setAttribute("position", positionAtributes);
+debugHolder.color = "#9c8f5e";
 
 const material = new THREE.MeshBasicMaterial({
-  color: "grey",
-  wireframe: true,
+  color: debugHolder.color,
 });
 const mesh = new THREE.Mesh(geometry, material);
 scene.add(mesh);
+
+const cubeTweaks = gui.addFolder("My cube");
+
+cubeTweaks.add(mesh.position, "y").min(-3).max(3).step(0.01).name("elevation");
+cubeTweaks.add(mesh, "visible");
+cubeTweaks.add(material, "wireframe");
+cubeTweaks.addColor(debugHolder, "color").onChange(() => {
+  material.color.set(debugHolder.color);
+});
+debugHolder.spin = () => {
+  gsap.to(mesh.rotation, {
+    y: mesh.rotation.y + Math.PI * 2,
+  });
+};
+
+cubeTweaks.add(debugHolder, "spin");
+
+debugHolder.subdivision = 2;
+cubeTweaks
+  .add(debugHolder, "subdivision")
+  .min(1)
+  .max(20)
+  .step(1)
+  .onFinishChange(() => {
+    mesh.geometry.dispose();
+    mesh.geometry = new THREE.BoxGeometry(
+      1,
+      1,
+      1,
+      debugHolder.subdivision,
+      debugHolder.subdivision,
+      debugHolder.subdivision
+    );
+  });
 
 const sizes = {
   width: window.innerWidth,
@@ -73,7 +112,7 @@ const tick = () => {
   const currentTime = Date.now();
   const deltaTime = currentTime - time;
   time = currentTime;
-  mesh.rotation.y += deltaTime * 0.001;
+  // mesh.rotation.y += deltaTime * 0.001;
 
   controls.update();
   renderer.render(scene, camera);
