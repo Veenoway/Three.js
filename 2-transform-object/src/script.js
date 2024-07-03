@@ -50,26 +50,29 @@ const group = new THREE.Group();
 
 // ENVIRONEMENT MAP
 const rgbeLoader = new RGBELoader();
-rgbeLoader.load("./textures/2k.hdr", (env) => {
-  env.mapping = THREE.EquirectangularReflectionMapping;
-  scene.background = env;
-  scene.environment = env;
-});
+rgbeLoader.load(
+  "https://thumbs.dreamstime.com/b/paysage-de-lune-degr%C3%A9s-projection-equirectangular-carte-d-environnement-panorama-sph-rique-hdri-fond-l-espace-illustration-148886747.jpg",
+  (env) => {
+    env.mapping = THREE.EquirectangularReflectionMapping;
+    scene.background = env;
+    scene.environment = env;
+  }
+);
 
-const material = new THREE.MeshStandardMaterial();
-material.roughness = 0.2;
-material.metalness = 0.7;
-material.map = doorTexture;
-material.aoMap = doorAmbientTexture;
-material.aoMapIntensity = 1;
-material.displacementMap = doorHeightTexture;
-material.displacementScale = 0.1;
-material.metalnessMap = metalnessTexture;
-material.roughnessMap = roughnessTexture;
-doorTexture.colorSpace = THREE.SRGBColorSpace;
-material.normalMap = doorNormalTexture;
-material.alphaMap = doorAlphaTexture;
-material.transparent = true;
+const material = new THREE.MeshPhysicalMaterial();
+material.roughness = 1;
+material.metalness = 1;
+// material.map = doorTexture;
+// material.aoMap = doorAmbientTexture;
+// material.aoMapIntensity = 1;
+// material.displacementMap = doorHeightTexture;
+// material.displacementScale = 0.1;
+// material.metalnessMap = metalnessTexture;
+// material.roughnessMap = roughnessTexture;
+// doorTexture.colorSpace = THREE.SRGBColorSpace;
+// material.normalMap = doorNormalTexture;
+// material.alphaMap = doorAlphaTexture;
+// material.transparent = true;
 // material.side = THREE.DoubleSide;
 // material.shininess = 100;
 // material.specular = new THREE.Color(0x1188ff);
@@ -77,6 +80,22 @@ gui.add(material, "roughness").min(0.1).max(1).step(0.001);
 gui.add(material, "metalness").min(0.1).max(1).step(0.001);
 gui.add(material, "aoMapIntensity");
 // scene.add(gui)
+
+// material.sheen = 1;
+// material.sheenRoughness = 0.25;
+
+// Iridescence
+material.iridescence = 1;
+material.iridescenceIOR = 1;
+// material.iridescenceThicknessRange = [100, 800];
+
+// Transmission
+
+material.transmission = 1;
+material.ior = 1.5;
+gui.add(material, "transmission").min(0).max(1).step(0.0001);
+gui.add(material, "ior").min(0).max(10).step(0.0001);
+gui.add(material, "thickness").min(0).max(1).step(0.0001);
 
 const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.5, 64, 64), material);
 sphere.position.x = -1.5;
