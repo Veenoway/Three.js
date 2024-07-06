@@ -27,6 +27,7 @@ import {
 	Skeleton,
 	SkinnedMesh,
 	SrcAlphaFactor,
+	SRGBColorSpace,
 	TextureLoader,
 	Uint16BufferAttribute,
 	Vector3,
@@ -130,22 +131,40 @@ class MMDLoader extends Loader {
 
 		}
 
-		const modelExtension = this._extractExtension( url ).toLowerCase();
+		const parser = this._getParser();
+		const extractModelExtension = this._extractModelExtension;
 
-		// Should I detect by seeing header?
-		if ( modelExtension !== 'pmd' && modelExtension !== 'pmx' ) {
+		this.loader
+			.setMimeType( undefined )
+			.setPath( this.path )
+			.setResponseType( 'arraybuffer' )
+			.setRequestHeader( this.requestHeader )
+			.setWithCredentials( this.withCredentials )
+			.load( url, function ( buffer ) {
 
-			if ( onError ) onError( new Error( 'THREE.MMDLoader: Unknown model file extension .' + modelExtension + '.' ) );
+				try {
 
-			return;
+					const modelExtension = extractModelExtension( buffer );
 
-		}
+					if ( modelExtension !== 'pmd' && modelExtension !== 'pmx' ) {
 
-		this[ modelExtension === 'pmd' ? 'loadPMD' : 'loadPMX' ]( url, function ( data ) {
+						if ( onError ) onError( new Error( 'THREE.MMDLoader: Unknown model file extension .' + modelExtension + '.' ) );
 
-			onLoad(	builder.build( data, resourcePath, onProgress, onError )	);
+						return;
 
-		}, onProgress, onError );
+					}
+
+					const data = modelExtension === 'pmd' ? parser.parsePmd( buffer, true ) : parser.parsePmx( buffer, true );
+
+					onLoad( builder.build( data, resourcePath, onProgress, onError ) );
+
+				} catch ( e ) {
+
+					if ( onError ) onError( e );
+
+				}
+
+			}, onProgress, onError );
 
 	}
 
@@ -357,10 +376,11 @@ class MMDLoader extends Loader {
 
 	// private methods
 
-	_extractExtension( url ) {
+	_extractModelExtension( buffer ) {
 
-		const index = url.lastIndexOf( '.' );
-		return index < 0 ? '' : url.slice( index + 1 );
+		const decoder = new TextDecoder( 'utf-8' );
+		const bytes = new Uint8Array( buffer, 0, 3 );
+		return decoder.decode( bytes ).toLowerCase();
 
 	}
 
@@ -1133,16 +1153,17 @@ class MaterialBuilder {
 				 * MMDToonMaterial doesn't have ambient. Set it to emissive instead.
 				 * It'll be too bright if material has map texture so using coef 0.2.
 				 */
-			params.diffuse = new Color().fromArray( material.diffuse );
+			params.diffuse = new Color().setRGB(
+				material.diffuse[ 0 ],
+				material.diffuse[ 1 ],
+				material.diffuse[ 2 ],
+				SRGBColorSpace
+			);
 			params.opacity = material.diffuse[ 3 ];
-			params.specular = new Color().fromArray( material.specular );
+			params.specular = new Color().setRGB( ...material.specular, SRGBColorSpace );
 			params.shininess = material.shininess;
-			params.emissive = new Color().fromArray( material.ambient );
+			params.emissive = new Color().setRGB( ...material.ambient, SRGBColorSpace );
 			params.transparent = params.opacity !== 1.0;
-
-			params.diffuse.convertSRGBToLinear();
-			params.specular.convertSRGBToLinear();
-			params.emissive.convertSRGBToLinear();
 
 			//
 
@@ -1452,6 +1473,7 @@ class MaterialBuilder {
 			t.flipY = false;
 			t.wrapS = RepeatWrapping;
 			t.wrapT = RepeatWrapping;
+			t.colorSpace = SRGBColorSpace;
 
 			for ( let i = 0; i < texture.readyCallbacks.length; i ++ ) {
 

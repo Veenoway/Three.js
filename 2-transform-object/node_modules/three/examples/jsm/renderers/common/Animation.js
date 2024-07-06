@@ -1,55 +1,47 @@
 class Animation {
 
-	constructor() {
+	constructor( nodes, info ) {
 
-		this.nodes = null;
+		this.nodes = nodes;
+		this.info = info;
 
 		this.animationLoop = null;
 		this.requestId = null;
 
-		this.isAnimating = false;
-
-		this.context = self;
+		this._init();
 
 	}
 
-	start() {
-
-		if ( this.isAnimating === true || this.animationLoop === null || this.nodes === null ) return;
-
-		this.isAnimating = true;
+	_init() {
 
 		const update = ( time, frame ) => {
 
 			this.requestId = self.requestAnimationFrame( update );
 
+			if ( this.info.autoReset === true ) this.info.reset();
+
 			this.nodes.nodeFrame.update();
 
-			this.animationLoop( time, frame );
+			this.info.frame = this.nodes.nodeFrame.frameId;
+
+			if ( this.animationLoop !== null ) this.animationLoop( time, frame );
 
 		};
 
-		this.requestId = self.requestAnimationFrame( update );
+		update();
 
 	}
 
-	stop() {
+	dispose() {
 
 		self.cancelAnimationFrame( this.requestId );
-
-		this.isAnimating = false;
+		this.requestId = null;
 
 	}
 
 	setAnimationLoop( callback ) {
 
 		this.animationLoop = callback;
-
-	}
-
-	setNodes( nodes ) {
-
-		this.nodes = nodes;
 
 	}
 
