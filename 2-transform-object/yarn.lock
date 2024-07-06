@@ -81,10 +81,10 @@
   "resolved" "https://registry.npmjs.org/source-map-js/-/source-map-js-1.0.2.tgz"
   "version" "1.0.2"
 
-"three@^0.153.0":
-  "integrity" "sha512-OCP2/uQR6GcDpSLnJt/3a4mdS0kNWcbfUXIwLoEMgLzEUIVIYsSDwskpmOii/AkDM+BBwrl6+CKgrjX9+E2aWg=="
-  "resolved" "https://registry.npmjs.org/three/-/three-0.153.0.tgz"
-  "version" "0.153.0"
+"three@^0.166.1":
+  "integrity" "sha512-LtuafkKHHzm61AQA1be2MAYIw1IjmhOUxhBa0prrLpEMWbV7ijvxCRHjSgHPGp2493wLBzwKV46tA9nivLEgKg=="
+  "resolved" "https://registry.npmjs.org/three/-/three-0.166.1.tgz"
+  "version" "0.166.1"
 
 "vite@^4.3.9":
   "integrity" "sha512-LONawOUUjxQridNWGQlNizfKH89qPigK36XhMI7COMGztz8KNY0JHim7/xDd71CZwGT4HtSRgI7Hy+RlhG0Gvg=="

@@ -144,6 +144,8 @@ class ThreeMFLoader extends Loader {
 
 			}
 
+			if ( relsName === undefined ) throw new Error( 'THREE.ThreeMFLoader: Cannot find relationship file `rels` in 3MF archive.' );
+
 			//
 
 			const relsView = zip[ relsName ];
@@ -1067,7 +1069,11 @@ class ThreeMFLoader extends Loader {
 			geometry.setIndex( new BufferAttribute( meshData[ 'triangles' ], 1 ) );
 			geometry.setAttribute( 'position', new BufferAttribute( meshData[ 'vertices' ], 3 ) );
 
-			const material = new MeshPhongMaterial( { color: 0xffffff, flatShading: true } );
+			const material = new MeshPhongMaterial( {
+				name: Loader.DEFAULT_MATERIAL_NAME,
+				color: 0xffffff,
+				flatShading: true
+			} );
 
 			const mesh = new Mesh( geometry, material );
 
